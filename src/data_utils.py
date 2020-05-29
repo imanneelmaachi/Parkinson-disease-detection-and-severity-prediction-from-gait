@@ -83,7 +83,9 @@ class Data:
         X = [self.X_ctrl, self.X_park]
         y = [self.y_ctrl, self.y_park]
         patients = [self.nb_data_per_person[:self.last_ctrl_patient], self.nb_data_per_person[self.last_ctrl_patient:]] # counts separated by classe
+        patients[1]= patients[1] - patients[1][0]
         diff_count = np.diff(self.nb_data_per_person)
+        diff_count = [diff_count[:self.last_ctrl_patient], diff_count[self.last_ctrl_patient:]]
         self.count_val = np.array([0])
         self.count_train = np.array([0])
         for i in range(len(X)):
@@ -100,22 +102,22 @@ class Data:
                 self.y_train = np.delete(y[i], np.arange(id_start,id_end) , 0)
 
 
-                self.count_val = np.append(self.count_val, diff_count[start_patient: end_patient])
-                self.count_train = np.append(self.count_train, np.delete(diff_count, np.arange(start_patient, end_patient)))
+                self.count_val = np.append(self.count_val, diff_count[i][start_patient: end_patient])
+                self.count_train = np.append(self.count_train, np.delete(diff_count[i], np.arange(start_patient, end_patient)))
 
 
 
             else:
-                start_patient = start_patient + patients[0].shape[0]  # patients0.shape 0 is the number of patients in the first class
-                end_patient =  end_patient+patients[0].shape[0]
-                self.X_val = np.vstack((self.X_val, self.X_data[id_start:id_end,:,:]))
-                self.X_train = np.vstack((self.X_train, np.delete(self.X_data, np.arange(id_start,id_end) , 0) ))
+                start_patient = start_patient #+ patients[0].shape[0]  # patients0.shape 0 is the number of patients in the first class
+                end_patient =  end_patient# +patients[0].shape[0]
+                self.X_val = np.vstack((self.X_val, X[i][id_start:id_end,:,:]))
+                self.X_train = np.vstack((self.X_train, np.delete(X[i], np.arange(id_start,id_end) , 0) ))
 
-                self.y_val = np.vstack((self.y_val, self.y_data[id_start:id_end] ))
-                self.y_train = np.vstack((self.y_train, np.delete(self.y_data, np.arange(id_start,id_end) , 0) ))
+                self.y_val = np.vstack((self.y_val, y[i][id_start:id_end] ))
+                self.y_train = np.vstack((self.y_train, np.delete(y[i], np.arange(id_start,id_end) , 0) ))
 
-                self.count_val = np.append( self.count_val , diff_count[start_patient: end_patient])
-                self.count_train = np.append(self.count_train,np.delete(diff_count, np.arange(start_patient, end_patient)) )
+                self.count_val = np.append( self.count_val , diff_count[i][start_patient: end_patient])
+                self.count_train = np.append(self.count_train,np.delete(diff_count[i], np.arange(start_patient, end_patient)) )
 
         self.count_val = np.cumsum(self.count_val)
         self.count_train = np.cumsum(self.count_train )
